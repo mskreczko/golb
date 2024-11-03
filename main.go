@@ -20,6 +20,3 @@ func main() {
 func proxyHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Incoming request: %s %s %s", r.RemoteAddr, r.Method, r.URL)
 }
-
-//TIP See GoLand help at <a href="https://www.jetbrains.com/help/go/">jetbrains.com/help/go/</a>.
-// Also, you can try interactive lessons for GoLand by selecting 'Help | Learn IDE Features' from the main menu.
