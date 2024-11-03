@@ -3,7 +3,10 @@ package main
 import "fmt"
 
 func main() {
-	fmt.Println("Hello World")
+	var c Config
+	c.GetConfig("config.yaml")
+
+	fmt.Println(c)
 }
 
 //TIP See GoLand help at <a href="https://www.jetbrains.com/help/go/">jetbrains.com/help/go/</a>.

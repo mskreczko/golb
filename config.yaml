@@ -1,0 +1,7 @@
+servers:
+  - addr: 192.168.0.10
+    healthcheck: /health
+  - addr: 192.168.0.11
+    healthcheck: /health
+  - addr: 192.168.0.11
+    healthcheck: /health-new
