@@ -18,6 +18,23 @@ type ServerPool struct {
 	mu               sync.Mutex
 }
 
+func (p *ServerPool) Init(servers []ServerConfig) {
+	p = &ServerPool{
+		servers:          []*Server{},
+		availableServers: []*Server{},
+		currentIdx:       0,
+		mu:               sync.Mutex{},
+	}
+
+	for _, srv := range servers {
+		p.servers = append(p.servers, &Server{
+			addr:                srv.Addr,
+			healthcheckEndpoint: srv.HealthcheckEndpoint,
+			alive:               p.healthcheck(srv.Addr, srv.HealthcheckEndpoint),
+		})
+	}
+}
+
 func (p *ServerPool) removeFromPool(server Server) {
 	for i, srv := range p.availableServers {
 		if server.addr == srv.addr {
@@ -35,7 +52,15 @@ func (p *ServerPool) addToPool(server Server) {
 	p.availableServers = append(p.availableServers, &server)
 }
 
-func (p *ServerPool) healthcheck() {
+func (p *ServerPool) healthcheck(addr string, healthcheckEndpoint string) bool {
+	_, err := http.Get(addr + healthcheckEndpoint)
+	if err != nil {
+		return false
+	}
+	return true
+}
+
+func (p *ServerPool) healthcheckAll() {
 	for idx := range p.availableServers {
 		_, err := http.Get(p.servers[idx].healthcheckEndpoint)
 		if err != nil {
@@ -47,6 +72,9 @@ func (p *ServerPool) healthcheck() {
 }
 
 func (p *ServerPool) getNext() *Server {
+	if len(p.availableServers) == 0 {
+		return nil
+	}
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	srv := p.availableServers[p.currentIdx%len(p.availableServers)]

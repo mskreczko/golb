@@ -9,6 +9,9 @@ func main() {
 	var c Config
 	c.GetConfig("config.yaml")
 
+	var sp ServerPool
+	sp.Init(c.Servers)
+
 	http.HandleFunc("/", proxyHandler)
 
 	log.Printf("Listening on: %s\n", c.GetFullAddress())
