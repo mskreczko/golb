@@ -1,7 +1,7 @@
 listening_addr: 127.0.0.1
 listening_port: 8080
 servers:
-  - addr: 127.0.0.1:8081
+  - addr: http://127.0.0.1:8081
     healthcheck: /health
-  - addr: 127.0.0.1:8082
+  - addr: http://127.0.0.1:8082
     healthcheck: /health

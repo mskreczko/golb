@@ -27,11 +27,16 @@ func (p *ServerPool) Init(servers []ServerConfig) {
 	}
 
 	for _, srv := range servers {
-		p.servers = append(p.servers, &Server{
+		health := p.healthcheck(srv.Addr, srv.HealthcheckEndpoint)
+		server := &Server{
 			addr:                srv.Addr,
 			healthcheckEndpoint: srv.HealthcheckEndpoint,
-			alive:               p.healthcheck(srv.Addr, srv.HealthcheckEndpoint),
-		})
+			alive:               health,
+		}
+		p.servers = append(p.servers, server)
+		if health {
+			p.availableServers = append(p.availableServers, server)
+		}
 	}
 }
 
