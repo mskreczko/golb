@@ -18,8 +18,8 @@ type ServerPool struct {
 	mu               sync.Mutex
 }
 
-func (p *ServerPool) Init(servers []ServerConfig) {
-	p = &ServerPool{
+func Init(servers []ServerConfig) *ServerPool {
+	p := &ServerPool{
 		servers:          []*Server{},
 		availableServers: []*Server{},
 		currentIdx:       0,
@@ -38,6 +38,7 @@ func (p *ServerPool) Init(servers []ServerConfig) {
 			p.availableServers = append(p.availableServers, server)
 		}
 	}
+	return p
 }
 
 func (p *ServerPool) removeFromPool(server Server) {
