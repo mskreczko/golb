@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 	"sync"
+	"time"
 )
 
 type Server struct {
@@ -44,7 +45,7 @@ func Init(servers []ServerConfig) *ServerPool {
 func (p *ServerPool) removeFromPool(server Server) {
 	for i, srv := range p.availableServers {
 		if server.addr == srv.addr {
-			p.servers = append(p.servers[:i], p.servers[i+1:]...)
+			p.availableServers = append(p.availableServers[:i], p.availableServers[i+1:]...)
 		}
 	}
 }
@@ -66,14 +67,17 @@ func (p *ServerPool) healthcheck(addr string, healthcheckEndpoint string) bool {
 	return true
 }
 
-func (p *ServerPool) healthcheckAll() {
-	for idx := range p.availableServers {
-		_, err := http.Get(p.servers[idx].healthcheckEndpoint)
-		if err != nil {
-			p.removeFromPool(*p.servers[idx])
-		} else {
-			p.addToPool(*p.servers[idx])
+func (p *ServerPool) HealthcheckAll() {
+	for {
+		for idx := range p.servers {
+			_, err := http.Get(p.servers[idx].addr + p.servers[idx].healthcheckEndpoint)
+			if err != nil {
+				p.removeFromPool(*p.servers[idx])
+			} else {
+				p.addToPool(*p.servers[idx])
+			}
 		}
+		time.Sleep(5 * time.Second)
 	}
 }
 

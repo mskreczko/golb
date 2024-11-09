@@ -16,6 +16,8 @@ func main() {
 	sp := Init(c.Servers)
 	ctx := context.Background()
 
+	go sp.HealthcheckAll()
+
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		proxyHandler(w, r, ctx, httpClient, sp)
 	})
@@ -29,19 +31,27 @@ func main() {
 func proxyHandler(w http.ResponseWriter, r *http.Request, ctx context.Context, httpClient *http.Client, sp *ServerPool) {
 	log.Printf("Incoming request: %s %s %s", r.RemoteAddr, r.Method, r.URL)
 
+	targetServer := sp.getNext()
+	if targetServer == nil {
+		w.WriteHeader(http.StatusServiceUnavailable)
+		return
+	}
+
 	req := r.Clone(ctx)
 	req.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
 	req.URL = &url.URL{
 		Scheme: "http",
-		Host:   strings.Split(sp.getNext().addr, "//")[1],
+		Host:   strings.Split(targetServer.addr, "//")[1],
 		Path:   r.URL.Path,
 	}
 	req.RequestURI = ""
+
+	log.Printf("Redirecting request to: %s", req.URL.String())
 
 	resp, err := httpClient.Do(req)
 	if err != nil {
 		log.Printf("Error sending request: %s", err)
 		return
 	}
-	log.Println(resp.Status)
+	w.WriteHeader(resp.StatusCode)
 }
