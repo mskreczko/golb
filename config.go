@@ -2,10 +2,9 @@ package main
 
 import (
 	"fmt"
+	"gopkg.in/yaml.v3"
 	"log"
 	"os"
-
-	"gopkg.in/yaml.v3"
 )
 
 type ServerConfig struct {
@@ -14,9 +13,10 @@ type ServerConfig struct {
 }
 
 type Config struct {
-	ListeningAddr string         `yaml:"listening_addr,omitempty"`
-	ListeningPort string         `yaml:"listening_port,omitempty"`
-	Servers       []ServerConfig `yaml:"servers"`
+	ListeningAddr       string         `yaml:"listening_addr,omitempty"`
+	ListeningPort       string         `yaml:"listening_port,omitempty"`
+	HealthcheckInterval int            `yaml:"healthcheck_interval,omitempty"`
+	Servers             []ServerConfig `yaml:"servers"`
 }
 
 func (c *Config) GetConfig(filename string) {
@@ -33,6 +33,9 @@ func (c *Config) GetConfig(filename string) {
 	}
 	if c.ListeningPort == "" {
 		c.ListeningPort = "80"
+	}
+	if c.HealthcheckInterval == 0 {
+		c.HealthcheckInterval = 5
 	}
 }
 

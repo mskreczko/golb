@@ -11,7 +11,7 @@ func main() {
 	c.GetConfig("config.yaml")
 
 	httpClient := &http.Client{}
-	sp := Init(c.Servers)
+	sp := Init(c.Servers, c.HealthcheckInterval)
 	ctx := context.Background()
 
 	go sp.HealthcheckAll()

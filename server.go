@@ -13,18 +13,20 @@ type Server struct {
 }
 
 type ServerPool struct {
-	servers          []*Server
-	availableServers []*Server
-	currentIdx       int
-	mu               sync.Mutex
+	servers             []*Server
+	availableServers    []*Server
+	currentIdx          int
+	mu                  sync.Mutex
+	healthcheckInterval time.Duration
 }
 
-func Init(servers []ServerConfig) *ServerPool {
+func Init(servers []ServerConfig, healthcheckInterval int) *ServerPool {
 	p := &ServerPool{
-		servers:          []*Server{},
-		availableServers: []*Server{},
-		currentIdx:       0,
-		mu:               sync.Mutex{},
+		servers:             []*Server{},
+		availableServers:    []*Server{},
+		currentIdx:          0,
+		mu:                  sync.Mutex{},
+		healthcheckInterval: time.Duration(healthcheckInterval),
 	}
 
 	for _, srv := range servers {
@@ -77,7 +79,7 @@ func (p *ServerPool) HealthcheckAll() {
 				p.addToPool(*p.servers[idx])
 			}
 		}
-		time.Sleep(5 * time.Second)
+		time.Sleep(p.healthcheckInterval * time.Second)
 	}
 }
 
