@@ -2,13 +2,16 @@ package main
 
 import (
 	"context"
+	"flag"
 	"log"
 	"net/http"
 )
 
 func main() {
 	var c Config
-	c.GetConfig("config.yaml")
+	configPath := flag.String("config", "config.yaml", "Path to config file")
+	flag.Parse()
+	c.GetConfig(*configPath)
 
 	httpClient := &http.Client{}
 	sp := Init(c.Servers, c.HealthcheckInterval)

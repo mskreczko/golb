@@ -19,8 +19,8 @@ type Config struct {
 	Servers             []ServerConfig `yaml:"servers"`
 }
 
-func (c *Config) GetConfig(filename string) {
-	yamlFile, err := os.ReadFile(filename)
+func (c *Config) GetConfig(configPath string) {
+	yamlFile, err := os.ReadFile(configPath)
 	if err != nil {
 		log.Fatalf("yamlFile.Get err   #%v ", err)
 	}
