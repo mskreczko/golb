@@ -1,58 +1,35 @@
 <script lang="js">
-    const servers = [
-        {addr: '192.168.0.1', healthcheckEndpoint: '/health', alive: true},
-        {addr: '192.168.0.2', healthcheckEndpoint: '/health', alive: true},
-        {addr: '192.168.0.3', healthcheckEndpoint: '/health', alive: false},
-        {addr: '192.168.0.4', healthcheckEndpoint: '/health', alive: true},
-        {addr: '192.168.0.5', healthcheckEndpoint: '/health', alive: false},
-    ]
+    // const servers = [
+    //     {addr: '192.168.0.1', healthcheckEndpoint: '/health', alive: true},
+    //     {addr: '192.168.0.2', healthcheckEndpoint: '/health', alive: true},
+    //     {addr: '192.168.0.3', healthcheckEndpoint: '/health', alive: false},
+    //     {addr: '192.168.0.4', healthcheckEndpoint: '/health', alive: true},
+    //     {addr: '192.168.0.5', healthcheckEndpoint: '/health', alive: false},
+    // ]
+    import { onMount } from "svelte";
+    const endpoint = "http://127.0.0.1:8080/metrics/servers";
+    let servers = [];
+
+    onMount(async function () {
+        const response = await fetch(endpoint);
+        const data = await response.json();
+        console.log(data);
+    });
 </script>
 
 <style>
-    .dot-red {
-        height: 10px;
-        width: 10px;
-        background-color: #e32235;
-        border: 1px solid #5e0c14;
-        border-radius: 50%;
-        display: inline-block;
-    }
-
-    .dot-green {
-        height: 10px;
-        width: 10px;
-        background-color: #12fc21;
-        border: 1px solid #1c7522;
-        border-radius: 50%;
-        display: inline-block;
-    }
-
-    .server-content {
-        display: inline;
-    }
-
-    .server-block {
-        border: 1px solid #000000;
-        border-radius: 10px;
-        padding: 5px;
-        width: 200px;
-        margin: 5px 0;
-        box-shadow: 8px 8px 24px -11px rgba(66, 68, 90, 1);
-    }
-
     .server-block:hover {
         background-color: #d9dbde;
         cursor: pointer;
     }
 </style>
 
-<h3>Servers</h3>
-<div>
+<ul class="list-none">
     {#each servers as server}
-        <div class="server-block">
-            <span class={server.alive ? 'dot-green' : 'dot-red'}></span>
-            <p class="server-content">{server.addr}</p>
-            <p class="server-content">{server.healthcheckEndpoint}</p>
-        </div>
+        <li class="server-block flex space-x-4 items-center w-full px-4 py-2 border-b border-gray-200 rounded-t-lg dark:border-gray-600">
+            <span class={server.alive ? 'flex w-3 h-3 me-3 bg-green-500 rounded-full' : 'flex w-3 h-3 me-3 bg-red-500 rounded-full'}></span>
+            <p>{server.addr}</p>
+            <p>{server.healthcheckEndpoint}</p>
+        </li>
     {/each}
-</div>
+</ul>

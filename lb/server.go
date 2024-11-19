@@ -22,7 +22,7 @@ type ServerPool struct {
 
 func Init(servers []ServerConfig, healthcheckInterval int) *ServerPool {
 	p := &ServerPool{
-		servers:             []*Server{},
+		Servers:             []*Server{},
 		availableServers:    []*Server{},
 		currentIdx:          0,
 		mu:                  sync.Mutex{},
