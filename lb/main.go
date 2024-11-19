@@ -23,6 +23,10 @@ func main() {
 		proxyHandler(w, r, ctx, httpClient, sp)
 	})
 
+	http.HandleFunc("/metrics/servers", func(w http.ResponseWriter, r *http.Request) {
+		sp.GetAllServers(w)
+	})
+
 	log.Printf("Listening on: %s\n", c.GetFullAddress())
 	if err := http.ListenAndServe(c.GetFullAddress(), nil); err != nil {
 		log.Fatalf("Error starting server: %s", err)

@@ -13,7 +13,7 @@ type Server struct {
 }
 
 type ServerPool struct {
-	servers             []*Server
+	Servers             []*Server
 	availableServers    []*Server
 	currentIdx          int
 	mu                  sync.Mutex
@@ -36,7 +36,7 @@ func Init(servers []ServerConfig, healthcheckInterval int) *ServerPool {
 			healthcheckEndpoint: srv.HealthcheckEndpoint,
 			alive:               health,
 		}
-		p.servers = append(p.servers, server)
+		p.Servers = append(p.Servers, server)
 		if health {
 			p.availableServers = append(p.availableServers, server)
 		}
@@ -71,12 +71,12 @@ func (p *ServerPool) healthcheck(addr string, healthcheckEndpoint string) bool {
 
 func (p *ServerPool) HealthcheckAll() {
 	for {
-		for idx := range p.servers {
-			_, err := http.Get(p.servers[idx].addr + p.servers[idx].healthcheckEndpoint)
+		for idx := range p.Servers {
+			_, err := http.Get(p.Servers[idx].addr + p.Servers[idx].healthcheckEndpoint)
 			if err != nil {
-				p.removeFromPool(*p.servers[idx])
+				p.removeFromPool(*p.Servers[idx])
 			} else {
-				p.addToPool(*p.servers[idx])
+				p.addToPool(*p.Servers[idx])
 			}
 		}
 		time.Sleep(p.healthcheckInterval * time.Second)
