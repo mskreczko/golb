@@ -1,20 +1,17 @@
 <script lang="js">
-    // const servers = [
-    //     {addr: '192.168.0.1', healthcheckEndpoint: '/health', alive: true},
-    //     {addr: '192.168.0.2', healthcheckEndpoint: '/health', alive: true},
-    //     {addr: '192.168.0.3', healthcheckEndpoint: '/health', alive: false},
-    //     {addr: '192.168.0.4', healthcheckEndpoint: '/health', alive: true},
-    //     {addr: '192.168.0.5', healthcheckEndpoint: '/health', alive: false},
-    // ]
-    import {onMount} from "svelte";
-
     const endpoint = "http://127.0.0.1:8080/metrics/servers";
     let servers = [];
 
-    onMount(async function () {
+    async function getServers() {
         const response = await fetch(endpoint);
         servers = await response.json();
-    });
+    }
+
+    let clear
+    $: {
+        clearInterval(clear)
+        clear = setInterval(getServers, 5000)
+    }
 </script>
 
 <style>
