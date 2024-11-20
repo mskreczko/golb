@@ -6,14 +6,14 @@
     //     {addr: '192.168.0.4', healthcheckEndpoint: '/health', alive: true},
     //     {addr: '192.168.0.5', healthcheckEndpoint: '/health', alive: false},
     // ]
-    import { onMount } from "svelte";
+    import {onMount} from "svelte";
+
     const endpoint = "http://127.0.0.1:8080/metrics/servers";
     let servers = [];
 
     onMount(async function () {
         const response = await fetch(endpoint);
-        const data = await response.json();
-        console.log(data);
+        servers = await response.json();
     });
 </script>
 

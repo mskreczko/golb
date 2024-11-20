@@ -7,9 +7,9 @@ import (
 )
 
 type Server struct {
-	addr                string
-	healthcheckEndpoint string
-	alive               bool
+	Addr                string `json:"addr"`
+	HealthcheckEndpoint string `json:"healthcheckEndpoint"`
+	Alive               bool   `json:"alive"`
 }
 
 type ServerPool struct {
@@ -32,9 +32,9 @@ func Init(servers []ServerConfig, healthcheckInterval int) *ServerPool {
 	for _, srv := range servers {
 		health := p.healthcheck(srv.Addr, srv.HealthcheckEndpoint)
 		server := &Server{
-			addr:                srv.Addr,
-			healthcheckEndpoint: srv.HealthcheckEndpoint,
-			alive:               health,
+			Addr:                srv.Addr,
+			HealthcheckEndpoint: srv.HealthcheckEndpoint,
+			Alive:               health,
 		}
 		p.Servers = append(p.Servers, server)
 		if health {
@@ -46,7 +46,7 @@ func Init(servers []ServerConfig, healthcheckInterval int) *ServerPool {
 
 func (p *ServerPool) removeFromPool(server Server) {
 	for i, srv := range p.availableServers {
-		if server.addr == srv.addr {
+		if server.Addr == srv.Addr {
 			p.availableServers = append(p.availableServers[:i], p.availableServers[i+1:]...)
 		}
 	}
@@ -54,7 +54,7 @@ func (p *ServerPool) removeFromPool(server Server) {
 
 func (p *ServerPool) addToPool(server Server) {
 	for _, srv := range p.availableServers {
-		if server.addr == srv.addr {
+		if server.Addr == srv.Addr {
 			return
 		}
 	}
@@ -72,7 +72,7 @@ func (p *ServerPool) healthcheck(addr string, healthcheckEndpoint string) bool {
 func (p *ServerPool) HealthcheckAll() {
 	for {
 		for idx := range p.Servers {
-			_, err := http.Get(p.Servers[idx].addr + p.Servers[idx].healthcheckEndpoint)
+			_, err := http.Get(p.Servers[idx].Addr + p.Servers[idx].HealthcheckEndpoint)
 			if err != nil {
 				p.removeFromPool(*p.Servers[idx])
 			} else {
