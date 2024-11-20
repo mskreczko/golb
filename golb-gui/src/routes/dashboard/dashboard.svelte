@@ -1,4 +1,6 @@
 <script lang="js">
+    import ServerEntry from './server_entry.svelte';
+    import ServerDetails from './server_details.svelte';
     const endpoint = "http://127.0.0.1:8080/metrics/servers";
     let servers = [];
 
@@ -24,9 +26,9 @@
 <ul class="list-none">
     {#each servers as server}
         <li class="server-block flex space-x-4 items-center w-full px-4 py-2 border-b border-gray-200 rounded-t-lg dark:border-gray-600">
-            <span class={server.alive ? 'flex w-3 h-3 me-3 bg-green-500 rounded-full' : 'flex w-3 h-3 me-3 bg-red-500 rounded-full'}></span>
-            <p>{server.addr}</p>
-            <p>{server.healthcheckEndpoint}</p>
+            <ServerEntry addr={server.addr} alive={server.alive}>
+                <ServerDetails healthcheckEndpoint={server.healthcheckEndpoint} lastAlive={server.lastAlive} />
+            </ServerEntry>
         </li>
     {/each}
 </ul>
