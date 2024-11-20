@@ -74,8 +74,10 @@ func (p *ServerPool) HealthcheckAll() {
 		for idx := range p.Servers {
 			_, err := http.Get(p.Servers[idx].Addr + p.Servers[idx].HealthcheckEndpoint)
 			if err != nil {
+				p.Servers[idx].Alive = false
 				p.removeFromPool(*p.Servers[idx])
 			} else {
+				p.Servers[idx].Alive = true
 				p.addToPool(*p.Servers[idx])
 			}
 		}
