@@ -7,9 +7,10 @@ import (
 )
 
 type Server struct {
-	Addr                string `json:"addr"`
-	HealthcheckEndpoint string `json:"healthcheckEndpoint"`
-	Alive               bool   `json:"alive"`
+	Addr                string   `json:"addr"`
+	HealthcheckEndpoint string   `json:"healthcheckEndpoint"`
+	Alive               bool     `json:"alive"`
+	LastAlive           JSONTime `json:"lastAlive"`
 }
 
 type ServerPool struct {
@@ -78,6 +79,7 @@ func (p *ServerPool) HealthcheckAll() {
 				p.removeFromPool(*p.Servers[idx])
 			} else {
 				p.Servers[idx].Alive = true
+				p.Servers[idx].LastAlive = JSONTime(time.Now())
 				p.addToPool(*p.Servers[idx])
 			}
 		}
