@@ -18,7 +18,6 @@
 
 <style>
     .server-block:hover {
-        background-color: #d9dbde;
         cursor: pointer;
     }
 </style>

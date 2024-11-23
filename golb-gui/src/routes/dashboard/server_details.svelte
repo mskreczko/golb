@@ -1,7 +1,7 @@
 <script>
-    let { lastActive, healthcheckEndpoint } = $props();
+    let { lastAlive, healthcheckEndpoint } = $props();
 </script>
 <div>
-    <p>Last active: {lastActive}</p>
+    <p>Last alive: {lastAlive}</p>
     <p>Healthcheck endpoint: {healthcheckEndpoint}</p>
 </div>

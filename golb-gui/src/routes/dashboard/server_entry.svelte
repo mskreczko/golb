@@ -3,15 +3,19 @@
     let expanded = $state(false);
 </script>
 
-<div class="collapsible">
-    <h3 class="flex">
-        <button aria-expanded={expanded} onclick={() => expanded = !expanded}>
-            <span class={alive ? 'flex w-3 h-3 me-3 bg-green-500 rounded-full' : 'flex w-3 h-3 me-3 bg-red-500 rounded-full'}></span>
-            {addr}
-            <svg viewBox="0 0 20 20" fill="none" >
-                <path class="vert" d="M10 1V19" stroke="black" stroke-width="2"/>
-                <path d="M1 10L19 10" stroke="black" stroke-width="2"/>
-            </svg>
+<div class="collapsible w-full">
+    <h3 class="flex items-center">
+        <button class="flex items-center w-full" aria-expanded={expanded} onclick={() => expanded = !expanded}>
+            <div class="flex items-center">
+                <span class={alive ? 'flex w-3 h-3 me-3 bg-green-500 rounded-full' : 'flex w-3 h-3 me-3 bg-red-500 rounded-full'}></span>
+                {addr}
+            </div>
+            <div>
+                <svg viewBox="0 0 20 20" fill="none">
+                    <path class="vert" d="M10 1V19" stroke="black" stroke-width="2"/>
+                    <path d="M1 10L19 10" stroke="black" stroke-width="2"/>
+                </svg>
+            </div>
         </button>
     </h3>
 
@@ -48,12 +52,8 @@
         display: none;
     }
 
-    button:focus svg{
+    button:focus svg {
         outline: 2px solid;
-    }
-
-    button [aria-expanded="true"] rect {
-        fill: currentColor;
     }
 
     svg {
