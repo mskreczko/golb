@@ -1,9 +1,9 @@
 package main
 
 import (
-	"fmt"
 	"gopkg.in/yaml.v3"
 	"log"
+	"net"
 	"os"
 )
 
@@ -40,8 +40,5 @@ func (c *Config) GetConfig(configPath string) {
 }
 
 func (c *Config) GetFullAddress() string {
-	if c.ListeningAddr == ":" {
-		return fmt.Sprintf(":%s", c.ListeningPort)
-	}
-	return fmt.Sprintf("%s:%s", c.ListeningAddr, c.ListeningPort)
+	return net.JoinHostPort(c.ListeningAddr, c.ListeningPort)
 }
