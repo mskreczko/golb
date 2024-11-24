@@ -18,5 +18,5 @@ func NewServer(ctx context.Context, httpClient *http.Client, sp *ServerPool) htt
 	handler = LogHttp(handler)
 	handler = CORS(handler)
 
-	return mux
+	return handler
 }

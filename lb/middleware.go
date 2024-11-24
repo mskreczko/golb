@@ -14,7 +14,7 @@ func LogHttp(next http.Handler) http.Handler {
 
 func CORS(next http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/metrics/server" {
+		if r.URL.Path == "/" {
 			next.ServeHTTP(w, r)
 		}
 		w.Header().Add("Access-Control-Allow-Origin", "*")

@@ -3,8 +3,13 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"log"
+	"log/slog"
 	"net/http"
+	"os"
+	"sync"
+	"time"
 )
 
 func main() {
@@ -17,25 +22,37 @@ func main() {
 	sp := Init(c.Servers, c.HealthcheckInterval)
 	ctx := context.Background()
 
+	srv := NewServer(ctx, httpClient, sp)
+	httpServer := &http.Server{
+		Addr:    c.GetFullAddress(),
+		Handler: srv,
+	}
+
 	go sp.HealthcheckAll()
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		proxyHandler(w, r, ctx, httpClient, sp)
-	})
+	go func() {
+		slog.Info("Listening on: ", "", c.GetFullAddress())
+		if err := httpServer.ListenAndServe(); err != nil {
+			fmt.Fprintf(os.Stderr, "error listening and serving: %s\n", err)
+		}
+	}()
 
-	http.HandleFunc("/metrics/servers", CORS(func(w http.ResponseWriter, r *http.Request) {
-		sp.GetAllServers(w)
-	}))
-
-	log.Printf("Listening on: %s\n", c.GetFullAddress())
-	if err := http.ListenAndServe(c.GetFullAddress(), nil); err != nil {
-		log.Fatalf("Error starting server: %s", err)
-	}
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		<-ctx.Done()
+		shutdownCtx := context.Background()
+		shutdownCtx, cancel := context.WithTimeout(shutdownCtx, 10*time.Second)
+		defer cancel()
+		if err := httpServer.Shutdown(shutdownCtx); err != nil {
+			fmt.Fprintf(os.Stderr, "error shutting down http server: %s\n", err)
+		}
+	}()
+	wg.Wait()
 }
 
 func proxyHandler(w http.ResponseWriter, r *http.Request, ctx context.Context, httpClient *http.Client, sp *ServerPool) {
-	log.Printf("Incoming request: %s %s %s", r.RemoteAddr, r.Method, r.URL)
-
 	targetServer := sp.getNext()
 	if targetServer == nil {
 		w.WriteHeader(http.StatusServiceUnavailable)
