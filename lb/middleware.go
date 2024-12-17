@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/prometheus/client_golang/prometheus"
 	"log/slog"
 	"net/http"
 )
@@ -28,5 +29,12 @@ func CORS(next http.Handler) http.HandlerFunc {
 		}
 
 		next.ServeHTTP(w, r)
+	}
+}
+
+func PrometheusMiddleware(next http.Handler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		next.ServeHTTP(w, r)
+		PromTotalRequests.With(prometheus.Labels{"path": r.URL.Path}).Inc()
 	}
 }

@@ -12,23 +12,27 @@ import (
 	"time"
 )
 
+var ServerPoolObj *ServerPool
+
 func main() {
 	var c Config
 	configPath := flag.String("config", "config.yaml", "Path to config file")
 	flag.Parse()
 	c.GetConfig(*configPath)
 
+	PromRegister()
+
 	httpClient := &http.Client{}
-	sp := Init(c.Servers, c.HealthcheckInterval)
+	ServerPoolObj = Init(c.Servers, c.HealthcheckInterval)
 	ctx := context.Background()
 
-	srv := NewServer(ctx, httpClient, sp)
+	srv := NewServer(ctx, httpClient, ServerPoolObj)
 	httpServer := &http.Server{
 		Addr:    c.GetFullAddress(),
 		Handler: srv,
 	}
 
-	go sp.HealthcheckAll()
+	go ServerPoolObj.HealthcheckAll()
 
 	go func() {
 		slog.Info("Listening on: ", "", c.GetFullAddress())

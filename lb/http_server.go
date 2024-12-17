@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"net/http"
 )
 
@@ -10,12 +11,11 @@ func NewServer(ctx context.Context, httpClient *http.Client, sp *ServerPool) htt
 	var handler http.Handler = mux
 	handler = LogHttp(handler)
 	handler = CORS(handler)
+	handler = PrometheusMiddleware(handler)
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		proxyHandler(w, r, ctx, httpClient, sp)
 	})
-	mux.HandleFunc("/metrics/servers", func(w http.ResponseWriter, r *http.Request) {
-		sp.GetAllServers(w)
-	})
+	mux.Handle("/metrics", promhttp.Handler())
 
 	return handler
 }

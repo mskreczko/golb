@@ -1,17 +1,38 @@
 package main
 
 import (
-	"encoding/json"
-	"net/http"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
-func (p *ServerPool) GetAllServers(w http.ResponseWriter) {
-	w.Header().Set("Content-Type", "application/json")
-	response, err := json.Marshal(p.Servers)
-	if err != nil {
-		http.Error(w, "Error marshaling JSON", http.StatusInternalServerError)
-		return
-	}
+var PromTotalRequests = prometheus.NewCounterVec(prometheus.CounterOpts{
+	Name: "http_requests_total",
+	Help: "Number of requests",
+}, []string{"path"})
 
-	w.Write(response)
+var PromServersAlive = prometheus.NewGauge(prometheus.GaugeOpts{
+	Name: "http_servers_alive",
+	Help: "Number of currently active servers",
+})
+
+type PromServersAliveCollector struct {
+	gaugeDesc *prometheus.Desc
+}
+
+func (c *PromServersAliveCollector) Describe(ch chan<- *prometheus.Desc) {
+	ch <- c.gaugeDesc
+}
+
+func (c *PromServersAliveCollector) Collect(ch chan<- prometheus.Metric) {
+	ch <- prometheus.MustNewConstMetric(c.gaugeDesc, prometheus.GaugeValue, float64(len(ServerPoolObj.AvailableServers)))
+}
+
+func NewPromServersAliveCollector() *PromServersAliveCollector {
+	return &PromServersAliveCollector{
+		gaugeDesc: prometheus.NewDesc("http_servers_alive", "Number of currently active servers", nil, nil),
+	}
+}
+
+func PromRegister() {
+	prometheus.Register(PromTotalRequests)
+	prometheus.Register(NewPromServersAliveCollector())
 }

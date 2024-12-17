@@ -15,7 +15,7 @@ type Server struct {
 
 type ServerPool struct {
 	Servers             []*Server
-	availableServers    []*Server
+	AvailableServers    []*Server
 	currentIdx          int
 	mu                  sync.Mutex
 	healthcheckInterval time.Duration
@@ -24,7 +24,7 @@ type ServerPool struct {
 func Init(servers []ServerConfig, healthcheckInterval int) *ServerPool {
 	p := &ServerPool{
 		Servers:             []*Server{},
-		availableServers:    []*Server{},
+		AvailableServers:    []*Server{},
 		currentIdx:          0,
 		mu:                  sync.Mutex{},
 		healthcheckInterval: time.Duration(healthcheckInterval),
@@ -39,27 +39,27 @@ func Init(servers []ServerConfig, healthcheckInterval int) *ServerPool {
 		}
 		p.Servers = append(p.Servers, server)
 		if health {
-			p.availableServers = append(p.availableServers, server)
+			p.AvailableServers = append(p.AvailableServers, server)
 		}
 	}
 	return p
 }
 
 func (p *ServerPool) removeFromPool(server Server) {
-	for i, srv := range p.availableServers {
+	for i, srv := range p.AvailableServers {
 		if server.Addr == srv.Addr {
-			p.availableServers = append(p.availableServers[:i], p.availableServers[i+1:]...)
+			p.AvailableServers = append(p.AvailableServers[:i], p.AvailableServers[i+1:]...)
 		}
 	}
 }
 
 func (p *ServerPool) addToPool(server Server) {
-	for _, srv := range p.availableServers {
+	for _, srv := range p.AvailableServers {
 		if server.Addr == srv.Addr {
 			return
 		}
 	}
-	p.availableServers = append(p.availableServers, &server)
+	p.AvailableServers = append(p.AvailableServers, &server)
 }
 
 func (p *ServerPool) healthcheck(addr string, healthcheckEndpoint string) bool {
@@ -88,12 +88,12 @@ func (p *ServerPool) HealthcheckAll() {
 }
 
 func (p *ServerPool) getNext() *Server {
-	if len(p.availableServers) == 0 {
+	if len(p.AvailableServers) == 0 {
 		return nil
 	}
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	srv := p.availableServers[p.currentIdx%len(p.availableServers)]
+	srv := p.AvailableServers[p.currentIdx%len(p.AvailableServers)]
 	p.currentIdx++
 	return srv
 }
