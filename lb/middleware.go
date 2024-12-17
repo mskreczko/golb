@@ -4,6 +4,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"log/slog"
 	"net/http"
+	"time"
 )
 
 func LogHttp(next http.Handler) http.Handler {
@@ -34,7 +35,10 @@ func CORS(next http.Handler) http.HandlerFunc {
 
 func PrometheusMiddleware(next http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		timestampStart := time.Now()
 		next.ServeHTTP(w, r)
+		timestampEnd := time.Now()
 		PromTotalRequests.With(prometheus.Labels{"path": r.URL.Path}).Inc()
+		PromRequestLatency.Observe(timestampEnd.Sub(timestampStart).Seconds())
 	}
 }

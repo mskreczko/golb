@@ -9,30 +9,32 @@ var PromTotalRequests = prometheus.NewCounterVec(prometheus.CounterOpts{
 	Help: "Number of requests",
 }, []string{"path"})
 
-var PromServersAlive = prometheus.NewGauge(prometheus.GaugeOpts{
-	Name: "http_servers_alive",
-	Help: "Number of currently active servers",
+var PromRequestLatency = prometheus.NewHistogram(prometheus.HistogramOpts{
+	Name:    "http_request_latency_seconds",
+	Help:    "Latency of HTTP requests",
+	Buckets: []float64{0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10},
 })
 
-type PromServersAliveCollector struct {
-	gaugeDesc *prometheus.Desc
+type PromCollector struct {
+	serversAliveDesc *prometheus.Desc
 }
 
-func (c *PromServersAliveCollector) Describe(ch chan<- *prometheus.Desc) {
-	ch <- c.gaugeDesc
+func (c *PromCollector) Describe(ch chan<- *prometheus.Desc) {
+	ch <- c.serversAliveDesc
 }
 
-func (c *PromServersAliveCollector) Collect(ch chan<- prometheus.Metric) {
-	ch <- prometheus.MustNewConstMetric(c.gaugeDesc, prometheus.GaugeValue, float64(len(ServerPoolObj.AvailableServers)))
+func (c *PromCollector) Collect(ch chan<- prometheus.Metric) {
+	ch <- prometheus.MustNewConstMetric(c.serversAliveDesc, prometheus.GaugeValue, float64(len(ServerPoolObj.AvailableServers)))
 }
 
-func NewPromServersAliveCollector() *PromServersAliveCollector {
-	return &PromServersAliveCollector{
-		gaugeDesc: prometheus.NewDesc("http_servers_alive", "Number of currently active servers", nil, nil),
+func NewPromServersAliveCollector() *PromCollector {
+	return &PromCollector{
+		serversAliveDesc: prometheus.NewDesc("http_servers_alive", "Number of currently active servers", nil, nil),
 	}
 }
 
 func PromRegister() {
 	prometheus.Register(PromTotalRequests)
 	prometheus.Register(NewPromServersAliveCollector())
+	prometheus.Register(PromRequestLatency)
 }
